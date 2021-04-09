@@ -18,6 +18,10 @@ class ChatListViewController: UIViewController {
         
         chatListTableView.delegate = self
         chatListTableView.dataSource = self
+        
+        self.navigationController?.navigationBar.barTintColor = .rgb(red: 39, green:49, blue: 69)
+        self.navigationController?.navigationBar.topItem?.title = "TALK"
+        navigationController?.navigationBar.titleTextAttributes = [.foregroundColor: UIColor.white]
     }
 }
 
@@ -40,7 +44,14 @@ extension ChatListViewController : UITableViewDelegate,UITableViewDataSource {
         return cell
     }
     
-    
+    //MARK: - React When user tap cells
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        print("tapped table view ")
+        let storyboard = UIStoryboard.init(name: "ChatRoom", bundle: nil)
+        let chatRoomViewController = storyboard.instantiateViewController(withIdentifier: "ChatRoomViewController")
+        navigationController?.pushViewController(chatRoomViewController, animated: true)
+        
+    }
 }
 
 class ChatListTableViewCell : UITableViewCell{
@@ -52,6 +63,8 @@ class ChatListTableViewCell : UITableViewCell{
     
     override func awakeFromNib() {
         super.awakeFromNib()
+        
+        
         
         userImageView.layer.cornerRadius = 35
     }
