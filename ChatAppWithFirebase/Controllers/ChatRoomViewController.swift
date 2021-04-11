@@ -15,29 +15,32 @@ class ChatRoomViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        chatRoomTableView.backgroundColor = . green
         chatRoomTableView.delegate = self
         chatRoomTableView.dataSource = self
-        chatRoomTableView.register(UITableViewCell.self, forCellReuseIdentifier: cellId)
-    }
+        chatRoomTableView.register(UINib(nibName: "ChatRoomTableViewCell", bundle: nil), forCellReuseIdentifier: cellId)
+        chatRoomTableView.backgroundColor = .rgb(red: 118, green: 140, blue: 180)
 }
+    
+}
+    
 
 extension ChatRoomViewController : UITableViewDelegate, UITableViewDataSource{
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        80
+        chatRoomTableView.estimatedRowHeight = 20
+        return UITableView.automaticDimension
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        10
+        return 10
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = chatRoomTableView.dequeueReusableCell(withIdentifier: cellId , for: indexPath)
-        cell.backgroundColor = .purple
         return cell
     }
     
     
 }
+
 
