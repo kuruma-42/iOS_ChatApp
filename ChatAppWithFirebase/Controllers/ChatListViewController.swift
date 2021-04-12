@@ -63,9 +63,6 @@ class ChatListTableViewCell : UITableViewCell{
     
     override func awakeFromNib() {
         super.awakeFromNib()
-        
-        
-        
         userImageView.layer.cornerRadius = 35
     }
     
