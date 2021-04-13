@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner" customClass="ChatInputAccessoryView" customModule="ChatAppWithFirebase" customModuleProvider="target">
+            <connections>
+                <outlet property="chatTextView" destination="okq-FJ-qzV" id="l1J-HD-D3A"/>
+                <outlet property="sendButton" destination="PEj-DR-QSh" id="8z4-vu-Yya"/>
+            </connections>
+        </placeholder>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB">
+            <rect key="frame" x="0.0" y="0.0" width="586" height="199"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <textView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" scrollEnabled="NO" text="Please Enter Message." textAlignment="natural" translatesAutoresizingMaskIntoConstraints="NO" id="okq-FJ-qzV">
+                    <rect key="frame" x="10" y="10" width="516" height="145"/>
+                    <color key="backgroundColor" red="0.93333333333333335" green="0.93333333333333335" blue="1" alpha="1" colorSpace="custom" customColorSpace="calibratedRGB"/>
+                    <color key="textColor" systemColor="labelColor"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                    <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
+                </textView>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="PEj-DR-QSh">
+                    <rect key="frame" x="536" y="68.5" width="40" height="30"/>
+                    <constraints>
+                        <constraint firstAttribute="width" constant="40" id="gNs-kY-7Ih"/>
+                        <constraint firstAttribute="height" constant="30" id="w4M-g9-2QU"/>
+                    </constraints>
+                    <state key="normal" image="paper-plane"/>
+                    <connections>
+                        <action selector="tappedSendButton:" destination="-1" eventType="touchUpInside" id="cqh-TS-ZBu"/>
+                    </connections>
+                </button>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
+            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+            <constraints>
+                <constraint firstItem="PEj-DR-QSh" firstAttribute="centerY" secondItem="okq-FJ-qzV" secondAttribute="centerY" constant="1" id="A5d-63-KPn"/>
+                <constraint firstItem="okq-FJ-qzV" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" constant="10" id="Nm3-Cg-soa"/>
+                <constraint firstItem="PEj-DR-QSh" firstAttribute="leading" secondItem="okq-FJ-qzV" secondAttribute="trailing" constant="10" id="Rfg-wg-5su"/>
+                <constraint firstItem="vUN-kp-3ea" firstAttribute="bottom" secondItem="okq-FJ-qzV" secondAttribute="bottom" constant="10" id="e4A-2Z-b3o"/>
+                <constraint firstItem="vUN-kp-3ea" firstAttribute="trailing" secondItem="PEj-DR-QSh" secondAttribute="trailing" constant="10" id="uer-VX-ieW"/>
+                <constraint firstItem="okq-FJ-qzV" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="10" id="yvV-KN-13q"/>
+            </constraints>
+            <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
+            <point key="canvasLocation" x="224.63768115942031" y="75.334821428571431"/>
+        </view>
+    </objects>
+    <resources>
+        <image name="paper-plane" width="256" height="256"/>
+        <systemColor name="labelColor">
+            <color white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>
