@@ -43,6 +43,32 @@ class SignUpViewController: UIViewController {
     }
     
     @objc private func tappedRegisterButton() {
+        guard let image = profileImageButton.imageView?.image else {return}
+        guard let uploadImage = image.jpegData(compressionQuality: 0.3) else {return}
+        
+        let fileName = NSUUID().uuidString
+        let storageRef = Storage.storage().reference().child("profile_image").child(fileName)
+        
+        storageRef.putData(uploadImage, metadata: nil) { (metadata, err) in
+            if let err = err {
+                print("FireStoreage Information save Failed : \(err)")
+                return
+            }
+            
+            print("Firestorage Save Success")
+            storageRef.downloadURL { (url, err) in
+                if let err = err {
+                    print("Failed Download From Firestorage\(err)")
+                }
+                
+                guard let urlString = url?.absoluteString else { return }
+                print(" urlString: ", urlString)
+                self.createUserToFirestore(profileImageUrl: urlString)
+            }
+        }
+    }
+    
+    private func createUserToFirestore(profileImageUrl : String){
         guard let email = emailTextField.text else { return }
         guard let password = passwordTextField.text else { return }
         
@@ -60,7 +86,8 @@ class SignUpViewController: UIViewController {
             let docData = [
                 "email": email,
                 "username":username,
-                "createdAt":Timestamp()
+                "createdAt":Timestamp(),
+                "profileImageUrl" : profileImageUrl
             ] as [String : Any]
             
             
@@ -70,18 +97,18 @@ class SignUpViewController: UIViewController {
                     print("Save Data Failed at Database : \(err)")
                     return
                 }
-                print("Succe Save User Data at Database")
+                print("Success Save User Data at Database")
                 self.dismiss(animated: true, completion: nil)
             }
         }
     }
     
-   @objc private func tappedProfileImageButton() {
+    @objc private func tappedProfileImageButton() {
         let imagePickerController = UIImagePickerController()
-    imagePickerController.delegate = self
-    imagePickerController.allowsEditing = true
-    
-    self.present(imagePickerController, animated: true, completion: nil)
+        imagePickerController.delegate = self
+        imagePickerController.allowsEditing = true
+        
+        self.present(imagePickerController, animated: true, completion: nil)
     }
 }
 
