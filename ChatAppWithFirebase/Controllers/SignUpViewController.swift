@@ -6,6 +6,10 @@
 //
 
 import UIKit
+import Firebase
+import FirebaseAuth
+import FirebaseStorage
+
 
 class SignUpViewController: UIViewController {
     
@@ -27,7 +31,49 @@ class SignUpViewController: UIViewController {
         registerButton.layer.cornerRadius = 12
         
         profileImageButton.addTarget(self, action: #selector(tappedProfileImageButton), for: .touchUpInside)
+        registerButton.addTarget(self, action: #selector(tappedRegisterButton), for: .touchUpInside)
         
+        emailTextField.delegate = self
+        passwordTextField.delegate = self
+        usernameTextField.delegate = self
+        
+        registerButton.isEnabled = false
+        registerButton.backgroundColor = .rgb(red: 100, green: 100, blue: 100)
+        
+    }
+    
+    @objc private func tappedRegisterButton() {
+        guard let email = emailTextField.text else { return }
+        guard let password = passwordTextField.text else { return }
+        
+        Auth.auth().createUser(withEmail: email, password: password) { (res, err) in
+            if let err = err {
+                print("Save Auth Information Failed. \(err)")
+                return
+            }
+            print("Save Auth Information Success")
+            
+            //Mark - Get user UID from result
+            guard let uid = res?.user.uid else { return }
+            guard let username = self.usernameTextField.text else { return }
+            
+            let docData = [
+                "email": email,
+                "username":username,
+                "createdAt":Timestamp()
+            ] as [String : Any]
+            
+            
+            
+            Firestore.firestore().collection("users").document(uid).setData(docData) { (err) in
+                if let err = err {
+                    print("Save Data Failed at Database : \(err)")
+                    return
+                }
+                print("Succe Save User Data at Database")
+                self.dismiss(animated: true, completion: nil)
+            }
+        }
     }
     
    @objc private func tappedProfileImageButton() {
@@ -36,6 +82,24 @@ class SignUpViewController: UIViewController {
     imagePickerController.allowsEditing = true
     
     self.present(imagePickerController, animated: true, completion: nil)
+    }
+}
+
+extension SignUpViewController: UITextFieldDelegate {
+    
+    func textFieldDidChangeSelection(_ textField: UITextField) {
+        print("textField :", textField.text)
+        let emailIsEmpty = emailTextField.text?.isEmpty ?? false
+        let passwordIsEmpty = passwordTextField.text?.isEmpty ?? false
+        let usernameIsEmpty = usernameTextField.text?.isEmpty ?? false
+        
+        if emailIsEmpty || passwordIsEmpty || usernameIsEmpty {
+            registerButton.isEnabled = false
+            registerButton.backgroundColor = .rgb(red: 100, green: 100, blue: 100)
+        } else {
+            registerButton.isEnabled = true
+            registerButton.backgroundColor = .rgb(red: 0, green: 185, blue: 0)
+        }
     }
 }
 
@@ -57,4 +121,3 @@ extension SignUpViewController : UIImagePickerControllerDelegate, UINavigationCo
         dismiss(animated: true, completion: nil)
     }
 }
-
