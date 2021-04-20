@@ -47,7 +47,6 @@ extension ChatRoomViewController : ChatInputAccessoryViewDelegate{
         messages.append(text)
         chatInputAccessoryView.removeText()
         chatRoomTableView.reloadData()
-        
     }
 }
     
