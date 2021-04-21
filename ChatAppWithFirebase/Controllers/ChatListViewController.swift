@@ -7,17 +7,73 @@
 
 import UIKit
 import Firebase
+import Nuke
 
 class ChatListViewController: UIViewController {
     
     private let cellId = "cellId"
-    private var users = [User]()
+    private var chatrooms = [ChatRoom]()
+    private var user: User?{
+        didSet{
+            navigationItem.title = user?.username
+        }
+    }
+    
     
     @IBOutlet weak var chatListTableView: UITableView!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        setupViews()
+        confirmLoggedInUser()
+        fetchLoginUserInfo()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        fetchChatroomsInfoFromFirestore()
+        
+    }
+    
+    private func fetchChatroomsInfoFromFirestore(){
+        Firestore.firestore().collection("chatRooms").getDocuments { (snapshots, err) in
+            if let err = err{
+                print("Get ChatRooms Data Failed:\(err)")
+                return
+            }
+            
+            snapshots?.documents.forEach({ (snapshot) in
+                let dic = snapshot.data()
+                let chatroom = ChatRoom(dic: dic)
+                
+                guard let uid = Auth.auth().currentUser?.uid else { return }
+                chatroom.members.forEach { (memberUid) in
+                    if memberUid != uid {
+                        Firestore.firestore().collection("users").document(memberUid).getDocument { (snapshot, err) in
+                            if let err = err {
+                                print("Get Members Data Failed \(err)")
+                                return
+                            }
+                            
+                            guard let dic = snapshot?.data() else { return }
+                            let user = User(dic: dic)
+                            user.uid = snapshot?.documentID
+                            chatroom.partnerUser = user
+                            
+                            self.chatrooms.append(chatroom)
+                            print("self.chatrooms.count:",self.chatrooms.count)
+                            self.chatListTableView.reloadData()
+                        }
+                    }
+                }
+            })
+        }
+        
+    }
+    
+    private func setupViews() {
         chatListTableView.delegate = self
         chatListTableView.dataSource = self
         
@@ -26,6 +82,13 @@ class ChatListViewController: UIViewController {
         navigationController?.navigationBar.titleTextAttributes = [.foregroundColor: UIColor.white]
         
         
+        let rightBarButton = UIBarButtonItem(title: "New Chat", style: .plain, target: self, action: #selector(tappedNavRightBarButton))
+        navigationItem.rightBarButtonItem = rightBarButton
+        navigationItem.rightBarButtonItem?.tintColor = .white
+        
+    }
+    
+    private func confirmLoggedInUser(){
         if Auth.auth().currentUser?.uid == nil{
             let storyboard = UIStoryboard(name: "SignUp", bundle: nil)
             let signUpViewController = storyboard.instantiateViewController(withIdentifier: "SignUpViewController")
@@ -35,32 +98,31 @@ class ChatListViewController: UIViewController {
         }
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        fetchUserInfoFromFirestore()
+    
+    @objc private func tappedNavRightBarButton(){
+        let storyboard = UIStoryboard.init(name: "UserList", bundle: nil)
+        let userListViewController = storyboard.instantiateViewController(withIdentifier: "UserListViewController")
+        let nav = UINavigationController(rootViewController: userListViewController)
+        nav.modalPresentationStyle = .fullScreen
+        self.present(nav, animated: true, completion: nil)
     }
     
-    private func fetchUserInfoFromFirestore(){
-        Firestore.firestore().collection("users").getDocuments { (snapshots, err) in
-            if let err = err {
-                print("Get User Data Failed",err)
-                return
+    private func fetchLoginUserInfo(){
+        guard let uid = Auth.auth().currentUser?.uid else { return }
+        
+        Firestore.firestore().collection("users").document(uid).getDocument { (snapshot, err) in
+            if let err = err{
+                print("Get Login User Information Failed \(err)")
             }
             
-            snapshots?.documents.forEach({ (snapshot) in
-                //Mark - dic : data of users
-                let dic = snapshot.data()
-                let user = User.init(dic: dic)
-                
-                self.users.append(user)
-                self.chatListTableView.reloadData()
-                
-                self.users.forEach { (user) in
-                    print(":",user.username)
-                }
-            })
+            guard let snapshot = snapshot, let dic = snapshot.data() else { return }
+            
+            let user = User(dic: dic)
+            self.user = user
+            
         }
     }
+    
 }
 
 //MARK: - UITableViewDelegate,UITableViewDataSource
@@ -72,14 +134,14 @@ extension ChatListViewController : UITableViewDelegate,UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         
-        return users.count
+        return chatrooms.count
         
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = chatListTableView.dequeueReusableCell(withIdentifier: cellId, for: indexPath) as! ChatListTableViewCell
         
-        cell.user = users[indexPath.row]
+        cell.chatroom = chatrooms[indexPath.row]
         
         return cell
     }
@@ -95,15 +157,18 @@ extension ChatListViewController : UITableViewDelegate,UITableViewDataSource {
 
 class ChatListTableViewCell : UITableViewCell{
     
-    var user : User? {
-        didSet {
-            if let user = user{
-                partnerLabel.text = user.username
-                //            userImageView.image = user?.profileImageurl
-                dateLabel.text = dateFormatterForDateLabel(date: user.createdAt.dateValue())
-                latestMessageLabel.text = user.email
+    var chatroom : ChatRoom? {
+        didSet{
+            if let chatroom = chatroom {
+                partnerLabel.text = chatroom.partnerUser?.username
+                
+                guard let url = URL(string: chatroom.partnerUser?.profileImageurl ?? "") else { return }
+                Nuke.loadImage(with: url, into: userImageView)
+                
+                dateLabel.text = dateFormatterForDateLabel(date: chatroom.createdAt.dateValue())
+                
             }
-            
+            partnerLabel.text = chatroom?.partnerUser?.username
         }
     }
     
@@ -126,7 +191,7 @@ class ChatListTableViewCell : UITableViewCell{
     private func dateFormatterForDateLabel(date : Date) -> String{
         let formatter = DateFormatter()
         formatter.dateStyle = .full
-        formatter.timeStyle = .short
+        formatter.timeStyle = .none
         formatter.locale = Locale(identifier: "ko_KR")
         return formatter.string(from: date)
     }
