@@ -9,13 +9,17 @@ import UIKit
 
 class ChatRoomTableViewCell: UITableViewCell {
     
-    var messageText: String? {
+    var message: Message? {
         didSet{
-            guard let text = messageText else {return}
-            let width = estimateFrameForTextView(text: text).width + 20
-            
-            messageTextViewWithConstraint.constant = width
-            messageTextView.text = text
+            if let message = message {
+                messageTextView.text = message.message
+                
+                let width = estimateFrameForTextView(text: message.message).width + 20
+                messageTextViewWithConstraint.constant = width
+                
+                dateLabel.text = dateFormatterForDateLabel(date: message.createdAt.dateValue())
+                
+            }
         }
     }
     
@@ -41,5 +45,13 @@ class ChatRoomTableViewCell: UITableViewCell {
       let options = NSStringDrawingOptions.usesFontLeading.union(.usesLineFragmentOrigin)
         
         return NSString(string: text).boundingRect(with: size, options: options, attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 14)], context: nil)
+    }
+    
+    private func dateFormatterForDateLabel(date : Date) -> String{
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
+        formatter.locale = Locale(identifier: "ko_KR")
+        return formatter.string(from: date)
     }
 }

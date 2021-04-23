@@ -39,7 +39,6 @@ class ChatListViewController: UIViewController {
                     return
                 }
                 
-                
                 snapshots?.documentChanges.forEach({ (documentChange) in
                     switch documentChange.type {
                     case .added:
@@ -54,6 +53,7 @@ class ChatListViewController: UIViewController {
     private func handleAddedDocumentChage(documentChange : DocumentChange){
         let dic = documentChange.document.data()
         let chatroom = ChatRoom(dic: dic)
+        chatroom.documentId = documentChange.document.documentID
         
         guard let uid = Auth.auth().currentUser?.uid else { return }
         chatroom.members.forEach { (memberUid) in
@@ -152,7 +152,9 @@ extension ChatListViewController : UITableViewDelegate,UITableViewDataSource {
     //MARK: - React When user tap cells
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let storyboard = UIStoryboard.init(name: "ChatRoom", bundle: nil)
-        let chatRoomViewController = storyboard.instantiateViewController(withIdentifier: "ChatRoomViewController")
+        let chatRoomViewController = storyboard.instantiateViewController(withIdentifier: "ChatRoomViewController") as! ChatRoomViewController
+        chatRoomViewController.user = user
+        chatRoomViewController.chatroom = chatrooms[indexPath.row]
         navigationController?.pushViewController(chatRoomViewController, animated: true)
         
     }
