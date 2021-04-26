@@ -13,6 +13,7 @@ class ChatListViewController: UIViewController {
     
     private let cellId = "cellId"
     private var chatrooms = [ChatRoom]()
+    private var chatRoomListener: ListenerRegistration?
     private var user: User?{
         didSet{
             navigationItem.title = user?.username
@@ -27,12 +28,21 @@ class ChatListViewController: UIViewController {
         
         setupViews()
         confirmLoggedInUser()
-        fetchLoginUserInfo()
         fetchChatroomsInfoFromFirestore()
     }
     
-    private func fetchChatroomsInfoFromFirestore(){
-        Firestore.firestore().collection("chatRooms")
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        fetchLoginUserInfo()
+    }
+    
+    func fetchChatroomsInfoFromFirestore(){
+        chatRoomListener?.remove()
+        chatrooms.removeAll()
+        chatListTableView.reloadData()
+        
+        chatRoomListener = Firestore.firestore().collection("chatRooms")
             .addSnapshotListener { (snapshots, err) in
                 if let err = err{
                     print("Get ChatRooms Data Failed:\(err)")
@@ -63,20 +73,42 @@ class ChatListViewController: UIViewController {
         }
         chatroom.members.forEach { (memberUid) in
             if memberUid != uid {
-                Firestore.firestore().collection("users").document(memberUid).getDocument { (snapshot, err) in
+                Firestore.firestore().collection("users").document(memberUid).getDocument { (usersnapshot, err) in
                     if let err = err {
                         print("Get Members Data Failed \(err)")
                         return
                     }
                     
-                    guard let dic = snapshot?.data() else { return }
+                    guard let dic = usersnapshot?.data() else { return }
                     let user = User(dic: dic)
                     user.uid = documentChange.document.documentID
                     chatroom.partnerUser = user
                     
-                    self.chatrooms.append(chatroom)
-                    print("self.chatrooms.count:",self.chatrooms.count)
-                    self.chatListTableView.reloadData()
+                    guard let chatroomId = chatroom.documentId else { return }
+                    let latestMessageId = chatroom.latestMessageId
+                    
+                    if latestMessageId == "" {
+                        self.chatrooms.append(chatroom)
+                        self.chatListTableView.reloadData()
+                        return
+                    }
+                    
+                    Firestore.firestore().collection("chatRooms").document(chatroom.documentId ?? "").collection("messages").document(latestMessageId).getDocument { (messagesnapshot, err) in
+                        
+                        if let err = err {
+                            print("Get Latest Information Failed. \(err)")
+                            return
+                        }
+                        
+                        guard let dic = messagesnapshot?.data() else { return }
+                        let message = Message(dic: dic)
+                        chatroom.latestMessage = message
+                        
+                        self.chatrooms.append(chatroom)
+                        self.chatListTableView.reloadData()
+                        
+                    }
+                    
                 }
             }
         }
@@ -93,18 +125,35 @@ class ChatListViewController: UIViewController {
         
         
         let rightBarButton = UIBarButtonItem(title: "New Chat", style: .plain, target: self, action: #selector(tappedNavRightBarButton))
+        let logoutBarButton = UIBarButtonItem(title: "Logout", style: .plain, target: self, action: #selector(tappedLogoutButton))
         navigationItem.rightBarButtonItem = rightBarButton
         navigationItem.rightBarButtonItem?.tintColor = .white
-        
+        navigationItem.leftBarButtonItem = logoutBarButton
+        navigationItem.leftBarButtonItem?.tintColor = .white
+    }
+    
+    @objc private func tappedLogoutButton(){
+        do{
+            try
+                Auth.auth().signOut()
+            pushLoginViewController()
+        } catch {
+            print("Logout Failed. \(error)")
+        }
     }
     
     private func confirmLoggedInUser(){
         if Auth.auth().currentUser?.uid == nil{
-            let storyboard = UIStoryboard(name: "SignUp", bundle: nil)
-            let signUpViewController = storyboard.instantiateViewController(withIdentifier: "SignUpViewController")
-            as! SignUpViewController
-            self.present(signUpViewController, animated: true, completion: nil)
+            pushLoginViewController()
         }
+    }
+    
+    private func pushLoginViewController() {
+        let storyboard = UIStoryboard(name: "SignUp", bundle: nil)
+        let signUpViewController = storyboard.instantiateViewController(withIdentifier: "SignUpViewController")as! SignUpViewController
+        let nav = UINavigationController(rootViewController: signUpViewController)
+        nav.modalPresentationStyle = .fullScreen
+        self.present(nav, animated: true, completion: nil)
     }
     
     
@@ -175,8 +224,8 @@ class ChatListTableViewCell : UITableViewCell{
                 guard let url = URL(string: chatroom.partnerUser?.profileImageurl ?? "") else { return }
                 Nuke.loadImage(with: url, into: userImageView)
                 
-                dateLabel.text = dateFormatterForDateLabel(date: chatroom.createdAt.dateValue())
-                
+                dateLabel.text = dateFormatterForDateLabel(date: chatroom.latestMessage?.createdAt.dateValue() ?? Date())
+                latestMessageLabel.text = chatroom.latestMessage?.message
             }
             partnerLabel.text = chatroom?.partnerUser?.username
         }
@@ -201,7 +250,7 @@ class ChatListTableViewCell : UITableViewCell{
     private func dateFormatterForDateLabel(date : Date) -> String{
         let formatter = DateFormatter()
         formatter.dateStyle = .full
-        formatter.timeStyle = .none
+        formatter.timeStyle = .short
         formatter.locale = Locale(identifier: "ko_KR")
         return formatter.string(from: date)
     }
