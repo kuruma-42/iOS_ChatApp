@@ -9,6 +9,7 @@ import UIKit
 import Firebase
 import FirebaseAuth
 import FirebaseStorage
+import PKHUD
 
 
 class SignUpViewController: UIViewController {
@@ -60,8 +61,10 @@ class SignUpViewController: UIViewController {
     }
     
     @objc private func tappedRegisterButton() {
-        guard let image = profileImageButton.imageView?.image else {return}
-        guard let uploadImage = image.jpegData(compressionQuality: 0.3) else {return}
+        let image = profileImageButton.imageView?.image ?? UIImage(named: "user_picture")
+        guard let uploadImage = image?.jpegData(compressionQuality: 0.3) else {return}
+        
+        HUD.show(.progress)
         
         let fileName = NSUUID().uuidString
         let storageRef = Storage.storage().reference().child("profile_image").child(fileName)
@@ -69,6 +72,7 @@ class SignUpViewController: UIViewController {
         storageRef.putData(uploadImage, metadata: nil) { (metadata, err) in
             if let err = err {
                 print("FireStoreage Information save Failed : \(err)")
+                HUD.hide()
                 return
             }
             
@@ -76,6 +80,8 @@ class SignUpViewController: UIViewController {
             storageRef.downloadURL { (url, err) in
                 if let err = err {
                     print("Failed Download From Firestorage\(err)")
+                    HUD.hide()
+                    return
                 }
                 
                 guard let urlString = url?.absoluteString else { return }
@@ -92,6 +98,7 @@ class SignUpViewController: UIViewController {
         Auth.auth().createUser(withEmail: email, password: password) { (res, err) in
             if let err = err {
                 print("Save Auth Information Failed. \(err)")
+                HUD.hide()
                 return
             }
             print("Save Auth Information Success")
@@ -112,9 +119,11 @@ class SignUpViewController: UIViewController {
             Firestore.firestore().collection("users").document(uid).setData(docData) { (err) in
                 if let err = err {
                     print("Save Data Failed at Database : \(err)")
+                    HUD.hide()
                     return
                 }
                 print("Success Save User Data at Database")
+                HUD.hide()
                 self.dismiss(animated: true, completion: nil)
             }
         }
@@ -127,6 +136,11 @@ class SignUpViewController: UIViewController {
         
         self.present(imagePickerController, animated: true, completion: nil)
     }
+    
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        self.view.endEditing(true)
+    }
+    
 }
 
 extension SignUpViewController: UITextFieldDelegate {
