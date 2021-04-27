@@ -57,7 +57,6 @@ class ChatInputAccessoryView: UIView {
         return .zero
     }
     
-    
     private func nibInit() {
         let nib = UINib(nibName: "ChatInputAccessoryView", bundle: nil)
         guard let view = nib.instantiate(withOwner: self, options: nil).first as? UIView else { return }

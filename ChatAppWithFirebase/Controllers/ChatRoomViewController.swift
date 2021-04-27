@@ -15,12 +15,19 @@ class ChatRoomViewController: UIViewController {
 
     private let cellId = "cellId"
     private var messages = [Message]()
+    private let accessoryHeight: CGFloat = 100
+    private let tableViewContentInset: UIEdgeInsets = .init(top: 60, left: 0, bottom: 0, right: 0)
+    private let tableViewIndicatorInset: UIEdgeInsets = .init(top: 60, left: 0, bottom: 0, right: 0)
+    private var safeAreaBottom: CGFloat{
+            self.view.safeAreaInsets.bottom
+    }
+    
     
     
     //MARK: - Make Instance
     private lazy var chatInputAccessoryView : ChatInputAccessoryView = {
         let view = ChatInputAccessoryView()
-        view.frame = .init(x: 0, y: 0, width: view.frame.width, height: 100)
+        view.frame = .init(x: 0, y: 0, width: view.frame.width, height: accessoryHeight)
         view.delegate = self
         return view
     }()
@@ -29,18 +36,55 @@ class ChatRoomViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+      
+        setupNotification()
+        setupChatRoomTableView()
+        fetchMessage()
+}
+    private func setupNotification() {
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+    }
+    
+    private func setupChatRoomTableView(){
         chatRoomTableView.delegate = self
         chatRoomTableView.dataSource = self
         chatRoomTableView.register(UINib(nibName: "ChatRoomTableViewCell", bundle: nil), forCellReuseIdentifier: cellId)
         chatRoomTableView.backgroundColor = .rgb(red: 118, green: 140, blue: 180)
-        chatRoomTableView.contentInset = .init(top: 60, left: 0, bottom: 0, right: 0)
-        chatRoomTableView.scrollIndicatorInsets = .init(top: 60, left: 0, bottom: 0, right: 0)
-        //Keyboard gone whem slide down keyboard
+        chatRoomTableView.contentInset = tableViewContentInset
+        chatRoomTableView.scrollIndicatorInsets = tableViewIndicatorInset
+        //Keyboard gone when slide down keyboard
         chatRoomTableView.keyboardDismissMode = .interactive
         chatRoomTableView.transform = CGAffineTransform(a: 1, b: 0, c: 0, d: -1, tx: 0, ty: 0)
-        fetchMessagee()
-}
+    }
+    
+    @objc func keyboardWillShow(notification: NSNotification){
+        guard let userInfo = notification.userInfo else { return }
+        
+        if let keyboardFrame = (userInfo[UIResponder.keyboardFrameEndUserInfoKey] as AnyObject).cgRectValue {
+           
+            if keyboardFrame.height <= accessoryHeight{
+                return
+            }
+            
+            let top = keyboardFrame.height - safeAreaBottom
+            var moveY = -(top - chatRoomTableView.contentOffset.y)
+            // 최하단 부분에서 약간 밀려서 미조정 함.
+            if chatRoomTableView.contentOffset.y != -60 { moveY += 60 }
+            let contentInset = UIEdgeInsets(top: top, left: 0, bottom: 0, right: 0)
+            
+            chatRoomTableView.contentInset = contentInset
+            chatRoomTableView.scrollIndicatorInsets = contentInset
+            chatRoomTableView.contentOffset = CGPoint(x: 0 , y: moveY)
+        }
+        
+    }
+    
+    @objc func keyboardWillHide(){
+        chatRoomTableView.contentInset = tableViewContentInset
+        chatRoomTableView.scrollIndicatorInsets = tableViewIndicatorInset
+    }
+    
     
     override var inputAccessoryView: UIView? {
         get{
@@ -49,16 +93,17 @@ class ChatRoomViewController: UIViewController {
     }
     
     override var canBecomeFirstResponder: Bool {
-        return true 
+        return true
     }
     
-    private func fetchMessagee(){
+    
+    private func fetchMessage(){
         guard let chatroomDocId = chatroom?.documentId else { return }
         
         Firestore.firestore().collection("chatRooms").document(chatroomDocId).collection("messages")
             .addSnapshotListener { (snapshots, err) in
                 if let err = err {
-                    print("Get Message Information Failed")
+                    print("Get Message Information Failed\(err)")
                     return
                 }
                 
@@ -83,6 +128,8 @@ class ChatRoomViewController: UIViewController {
                 })
             }
     }
+    
+   
 }
 
 extension ChatRoomViewController : ChatInputAccessoryViewDelegate{
@@ -99,7 +146,7 @@ extension ChatRoomViewController : ChatInputAccessoryViewDelegate{
         
         let docData = [
             "name" : name,
-            "createAt": Timestamp(),
+            "createdAt": Timestamp(),
             "uid": uid,
             "message": text
         ] as [String : Any]
@@ -130,16 +177,16 @@ extension ChatRoomViewController : ChatInputAccessoryViewDelegate{
     }
     
     func randomString(length: Int) -> String {
-            let letters : NSString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-            let len = UInt32(letters.length)
-
-            var randomString = ""
+        let letters : NSString = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+        let len = UInt32(letters.length)
+        
+        var randomString = ""
         for _ in 0 ..< length {
-                let rand = arc4random_uniform(len)
-                var nextChar = letters.character(at: Int(rand))
-                randomString += NSString(characters: &nextChar, length: 1) as String
-            }
-            return randomString
+            let rand = arc4random_uniform(len)
+            var nextChar = letters.character(at: Int(rand))
+            randomString += NSString(characters: &nextChar, length: 1) as String
+        }
+        return randomString
     }
     
 }
@@ -160,7 +207,6 @@ extension ChatRoomViewController : UITableViewDelegate, UITableViewDataSource{
         let cell = chatRoomTableView.dequeueReusableCell(withIdentifier: cellId , for: indexPath) as! ChatRoomTableViewCell
         cell.transform = CGAffineTransform(a: 1, b: 0, c: 0, d: -1, tx: 0, ty: 0)
 //        cell.messageTextView.text = messages[indexPath.row]
-        
         cell.message = messages[indexPath.row]
         return cell
     }

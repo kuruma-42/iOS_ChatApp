@@ -64,7 +64,7 @@ class ChatRoomTableViewCell: UITableViewCell {
                 let width = estimateFrameForTextView(text: message.message).width + 20
                 myMessageTextViewWithConstraint.constant = width
                 
-                myDateLabel.text = dateFormatterForDateLabel(date: message.createdAt.dateValue())
+                myDateLabel.text = dateFormatterForDateLabel(date:message.createdAt.dateValue())
             }
         } else {
             partnerMessageTextView.isHidden = false
