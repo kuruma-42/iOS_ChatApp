@@ -29,6 +29,8 @@
 		02E386242632927A001F49D4 /* Message.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02E386232632927A001F49D4 /* Message.swift */; };
 		02E386292636A354001F49D4 /* Login.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 02E386282636A354001F49D4 /* Login.storyboard */; };
 		02E3862E2636A85B001F49D4 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02E3862D2636A85B001F49D4 /* LoginViewController.swift */; };
+		02E38653264174DF001F49D4 /* UserInfo.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 02E38652264174DF001F49D4 /* UserInfo.storyboard */; };
+		02E3865B2641931B001F49D4 /* UserInfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02E3865A2641931B001F49D4 /* UserInfoViewController.swift */; };
 		02FEEEA7262D2DAB0019EC98 /* UserList.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 02FEEEA6262D2DAB0019EC98 /* UserList.storyboard */; };
 		02FEEEAC262D2F970019EC98 /* UserListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02FEEEAB262D2F960019EC98 /* UserListViewController.swift */; };
 		02FEEEB1262F0AFF0019EC98 /* ChatRoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02FEEEB0262F0AFF0019EC98 /* ChatRoom.swift */; };
@@ -83,6 +85,8 @@
 		02E386232632927A001F49D4 /* Message.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Message.swift; sourceTree = "<group>"; };
 		02E386282636A354001F49D4 /* Login.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Login.storyboard; sourceTree = "<group>"; };
 		02E3862D2636A85B001F49D4 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
+		02E38652264174DF001F49D4 /* UserInfo.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = UserInfo.storyboard; sourceTree = "<group>"; };
+		02E3865A2641931B001F49D4 /* UserInfoViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInfoViewController.swift; sourceTree = "<group>"; };
 		02FEEEA6262D2DAB0019EC98 /* UserList.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = UserList.storyboard; sourceTree = "<group>"; };
 		02FEEEAB262D2F960019EC98 /* UserListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListViewController.swift; sourceTree = "<group>"; };
 		02FEEEB0262F0AFF0019EC98 /* ChatRoom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatRoom.swift; sourceTree = "<group>"; };
@@ -192,6 +196,7 @@
 				02D5102D2626DCBE00BDCC32 /* SignUpViewController.swift */,
 				02FEEEAB262D2F960019EC98 /* UserListViewController.swift */,
 				02E3862D2636A85B001F49D4 /* LoginViewController.swift */,
+				02E3865A2641931B001F49D4 /* UserInfoViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -204,6 +209,7 @@
 				02D510202626BA7200BDCC32 /* SignUp.storyboard */,
 				02FEEEA6262D2DAB0019EC98 /* UserList.storyboard */,
 				02E386282636A354001F49D4 /* Login.storyboard */,
+				02E38652264174DF001F49D4 /* UserInfo.storyboard */,
 			);
 			path = StoryBoards;
 			sourceTree = "<group>";
@@ -381,6 +387,7 @@
 				025B3A31261E029D0011DAE1 /* Assets.xcassets in Resources */,
 				025B3AB2262489F00011DAE1 /* GoogleService-Info.plist in Resources */,
 				025B3A5B261E0D670011DAE1 /* ChatList.storyboard in Resources */,
+				02E38653264174DF001F49D4 /* UserInfo.storyboard in Resources */,
 				025B3AA52622EECB0011DAE1 /* ChatInputAccessoryView.xib in Resources */,
 				02D510212626BA7200BDCC32 /* SignUp.storyboard in Resources */,
 				02E386292636A354001F49D4 /* Login.storyboard in Resources */,
@@ -513,6 +520,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				025B3A28261E029D0011DAE1 /* AppDelegate.swift in Sources */,
+				02E3865B2641931B001F49D4 /* UserInfoViewController.swift in Sources */,
 				025B3AAD2622F93C0011DAE1 /* ChatInputAccessoryView.swift in Sources */,
 				02D5102E2626DCBE00BDCC32 /* SignUpViewController.swift in Sources */,
 				025B3A79262086FD0011DAE1 /* UIColor-Extension.swift in Sources */,

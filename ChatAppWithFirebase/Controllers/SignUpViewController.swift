@@ -24,9 +24,7 @@ class SignUpViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
         setupViews()
-        
     }
     
     override func viewWillAppear(_ animated: Bool) {

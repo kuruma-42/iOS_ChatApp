@@ -124,6 +124,13 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="29c-EB-eaT"/>
+                    <connections>
+                        <outlet property="addressTextField" destination="yHz-Bz-ah2" id="912-6y-INS"/>
+                        <outlet property="dateofbirthTextField" destination="Hhv-Qd-qcv" id="ij8-Ri-AmI"/>
+                        <outlet property="phonenumberTextField" destination="LBS-0x-KOA" id="6Ab-8l-Wob"/>
+                        <outlet property="profileImageButton" destination="rXL-oC-mlE" id="VFz-HW-gpk"/>
+                        <outlet property="registerButton" destination="gPt-HZ-03P" id="em9-bK-w6U"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="DDV-kY-76D" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>

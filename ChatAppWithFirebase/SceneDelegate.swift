@@ -22,7 +22,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let chatListViewContoller = storyboard.instantiateViewController(identifier: "ChatListViewController")
         let nav = UINavigationController(rootViewController: chatListViewContoller)
         
-        
         window.rootViewController = nav
         guard let _ = (scene as? UIWindowScene) else { return }
     }
